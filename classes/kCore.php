@@ -80,12 +80,39 @@ class kCore extends sCore {
     return $default_value;
   }
 
+  public static function setSetting($name, $value) {
+    try {
+      $setting = new SiteSetting($name);
+    }
+    catch (fNotFoundException $e) {
+      $setting = new SiteSetting;
+      $setting->setName($name);
+      $setting->setValue($value);
+    }
+
+    $setting->store();
+    self::$settings[$name] = $value;
+  }
+
   protected static function configureAuthorization() {
-    sAuthorization::setAuthLevels(array('admin' => 100, 'user' => 50, 'guest' => 25));
-    sAuthorization::setLoginPage('/login');
+    sAuthorization::setAuthLevels(self::getSetting('auth.levels', 'array', array(
+      'admin' => 100,
+      'moderator' => 50,
+      'guest' => 1,
+    )));
+    sAuthorization::setLoginPage('/login/');
+  }
+
+  public static function configureTemplate() {
+    sTemplate::setCache(self::getCache());
+    sTemplate::setActiveTemplate(self::getSetting('template.name','string', 'kusaba-default'));
+    sTemplate::setSiteName(self::getSetting('site.name', 'string', __('{Kusaba-Y}: No site name')));
+    sTemplate::setSiteSlogan(self::getSetting('site.slogan', 'string', ''));
   }
 
   public static function main() {
     parent::main();
+    self::configureTemplate();
+    kRouter::run();
   }
 }

@@ -44,6 +44,7 @@ class kLoader extends sLoader {
    */
   private static $classes = array(
     'kCore',
+    'kRouter',
   );
 
   private static $model_classes = array(
@@ -66,6 +67,9 @@ class kLoader extends sLoader {
    * @var array
    */
   private static $router_classes = array(
+    'FrontController',
+    'NotFoundController',
+    'UserController',
   );
 
   /**
