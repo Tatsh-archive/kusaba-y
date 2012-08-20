@@ -48,15 +48,21 @@ INSERT INTO image_files (file_id, filename, filename_thumb, date_created, date_u
 CREATE TABLE users (
   user_id INTEGER AUTOINCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  email_address VARCHAR(128) NOT NULL,
   user_password VARCHAR(255) NOT NULL,
   auth_level VARCHAR(128) DEFAULT 'user' NOT NULL,
   date_created TIMESTAMP NOT NULL,
   date_updated TIMESTAMP NOT NULL,
   timezone VARCHAR(64) NOT NULL
 );
+CREATE UNIQUE INDEX idx_users_name ON users (name);
+CREATE UNIQUE INDEX idx_users_email ON users (email_address);
+
+INSERT INTO users (name, email_address, user_password, auth_level, date_created, date_updated, timezone) VALUES ('admin', 'admin@whatever.com', 'fCryptography::password_hash#IMJYInU76D#0d6ae9b9cda7a17cfece50e0664e6fa11762be65', 'admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'America/Los_Angeles');
+INSERT INTO users (name, email_address, user_password, auth_level, date_created, date_updated, timezone) VALUES ('first_mod', 'mod@whatever.com', 'fCryptography::password_hash#IMJYInU76D#0d6ae9b9cda7a17cfece50e0664e6fa11762be65', 'moderator', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'America/Los_Angeles');
 
 CREATE TABLE site_settings (
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(255) PRIMARY KEY,
   setting_value TEXT NOT NULL, -- can be any type
   last_edited_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   date_created TIMESTAMP NOT NULL,
