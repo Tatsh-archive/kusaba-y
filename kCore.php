@@ -1,5 +1,7 @@
 <?php
 class kCore extends sCore {
+  private static $settings = NULL;
+  
   public static function getCache() {
     if (self::$cache === NULL) {
       self::$cache = new sCache('apc');
@@ -37,8 +39,45 @@ class kCore extends sCore {
 
     return self::$db;
   }
-  
-  public static function getSetting($name, $default_value) {
+
+  private static function cast($value, $type = NULL) {
+    switch ($type) {
+      case 'int':
+      case 'integer':
+        $value = (int)$value;
+        break;
+
+      case 'float':
+        if (is_object($value)) {
+          break;
+        }
+        $value = (float)$value;
+        break;
+
+      case 'bool':
+      case 'boolean':
+        $value = (bool)$value;
+        break;
+    }
+
+    return $value;
+  }
+
+  public static function getSetting($name, $cast_to = NULL, $default_value = NULL) {
+    if (self::$settings === NULL) {
+      $set = fRecordSet::build('SiteSetting');
+      self::$settings = array();
+      
+      foreach ($set as $item) {
+        self::$settings[$item->getName()] = $item->getValue();
+      }
+    }
+
+    if (isset(self::$settings[$name])) {
+      return self::cast(self::$settings[$name], $cast_to);
+    }
+
+    return $default_value;
   }
 
   protected static function configureAuthorization() {
