@@ -103,11 +103,16 @@ class kCore extends sCore {
     sAuthorization::setLoginPage('/login/');
   }
 
+  public static function isProductionMode() {
+    return self::getSetting('site.mode', 'boolean', FALSE);
+  }
+
   public static function configureTemplate() {
     sTemplate::setCache(self::getCache());
     sTemplate::setActiveTemplate(self::getSetting('template.name','string', 'kusaba-default'));
     sTemplate::setSiteName(self::getSetting('site.name', 'string', __('{Kusaba-Y}: No site name')));
     sTemplate::setSiteSlogan(self::getSetting('site.slogan', 'string', ''));
+    sTemplate::setMode(self::isProductionMode() ? 'production' : 'development');
   }
 
   public static function main() {
