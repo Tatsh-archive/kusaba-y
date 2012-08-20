@@ -21,7 +21,6 @@ class kRouter {
     '/' => 'FrontController::index',
     '/login/' => 'AdminController::login',
     '/admin/' => 'AdminController::index',
-    '/logout' => 'AdminController::logout',
     '/logout/' => 'AdminController::logout',
   );
   
