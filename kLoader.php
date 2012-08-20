@@ -47,6 +47,17 @@ class kLoader extends sLoader {
   );
 
   private static $model_classes = array(
+    'Article',
+    'Board',
+    'BoardRule',
+    'Category',
+    'File',
+    'FAQ',
+    'ImageFile',
+    'Reply',
+    'SiteSetting',
+    'Thread',
+    'User',
   );
 
   /**
