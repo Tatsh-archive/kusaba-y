@@ -1,4 +1,3 @@
-kusaba-y-classes
-================
+## Kusaba Y
 
-Classes used within Kusaba Y.
+To be explained in greater details at a later date.
