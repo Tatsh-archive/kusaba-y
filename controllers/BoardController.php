@@ -49,6 +49,8 @@ class BoardController extends MoorActionController {
       }
 
       $validation->addRequiredFields('title', 'message', 'deletion_password');
+      $validation->setCSRFTokenField('csrf');
+      $validation->addEmailFields('email_address');
       $validation->validate();
 
       $thread = new Thread;
@@ -113,6 +115,7 @@ class BoardController extends MoorActionController {
       'date_updated',
       'timezone',
     ));
+    $form->enableCSRFField(TRUE);
     $form->setFieldAttributes('title', array('autocomplete' => 'off'));
     $form->setFieldAttributes('deletion_password', array('autocomplete' => 'off', 'value' => fCryptography::randomString(16)));
     $form->addField('image_files::filename', __('Image'), 'file', array('accept' => join(',', $this->default_image_types)));
