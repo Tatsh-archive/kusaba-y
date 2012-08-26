@@ -9,4 +9,18 @@ class Reply extends fActiveRecord {
   public function getId() {
     return $this->getReplyId();
   }
+
+  public function hasValidImageFile() {
+    $image = $this->createImageFile();
+
+    if (!($image instanceof ImageFile)) {
+      return FALSE;
+    }
+
+    if ($image->getFilename() === ImageFile::NO_IMAGE_VALUE) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
 }
