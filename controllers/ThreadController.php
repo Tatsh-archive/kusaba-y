@@ -7,16 +7,19 @@ class ThreadController extends MoorActionController {
    */
   private $thread;
 
-  /**
-   * @todo Move accepted image types to configuration.
-   */
-  private $default_image_types = array('image/jpeg', 'image/gif', 'image/png');
+  private $default_image_types;
 
-  private $default_max_size = '10MB';
+  private $default_max_size;
   
   public function beforeAction() {
     try {
       $this->thread = new Thread(fRequest::get('id', 'integer'));
+      $this->default_image_types = kCore::getSetting('posts.allowed_image_types', 'array', array(
+        'image/jpeg',
+        'image/gif',
+        'image/png'
+      ));
+      $this->default_max_size = kCore::getSetting('posts.image_maximum_file_size', 'string', '10MB');
     }
     catch (fNotFoundException $e) {
       fURL::redirect('/not-found/');
@@ -50,7 +53,12 @@ class ThreadController extends MoorActionController {
       }
 
       $uploader = new fUpload;
-      $uploader->setMIMETypes($this->default_image_types, 'The file uploaded is not an image');
+      $uploader->setMIMETypes(
+        $this->default_image_types,
+        fText::compose('The file uploaded is not an image or is not an allowed type: %s',
+          join(', ', $this->default_image_types)
+        )
+      );
       $uploader->setMaxSize($this->default_max_size);
       $uploader->setOptional(TRUE);
       $file = $uploader->move($storage_dir, 'image_files::filename');
