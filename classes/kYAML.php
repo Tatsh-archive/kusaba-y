@@ -40,7 +40,7 @@ class kYAML {
   }
 
   public static function decodeFile($path) {
-    $file = new fFile($path, TRUE);
+    $file = new fFile($path);
     return self::decode($file->read());
   }
 
