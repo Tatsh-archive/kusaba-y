@@ -20,13 +20,83 @@ class BoardController extends MoorActionController {
 
   private function getBoardByShortURL() {
     try {
-      $url = substr(fURL::get(), 1, -1);
+      $url = fURL::get();
+
+      if (substr($url, 0, 7) === '/admin/') {
+        fAuthorization::requireAuthLevel('admin');
+        return;
+      }
+
+      $url = substr($url, 1, -1);
       $set = fRecordSet::build('Board', array('short_u_r_l=' => $url));
       $set->tossIfEmpty();
       
       return $set[0];
     }
     catch (fEmptySetException $e) {
+      fURL::redirect('/not-found/');
+    }
+  }
+
+  /**
+   * @todo
+   */
+  public function adminPost() {
+    fURL::redirect();
+  }
+
+
+  public function admin() {
+    if (fRequest::isPost()) {
+      return $this->adminPost();
+    }
+
+    $sort_column = fCRUD::getSortColumn(array('name', 'short_u_r_l'));
+    $sort = fCRUD::getSortDirection('asc');
+    fCRUD::redirectWithLoadedValues();
+
+    $boards = fRecordSet::build('Board', array(), array($sort_column => $sort));
+    $content = sTemplate::buffer('admin-boards-list', array('boards' => $boards));
+
+    sTemplate::render(array('content' => $content, 'title' => 'Boards'));
+  }
+
+  /**
+   * @todo
+   */
+  public function adminEditBoardPost() {
+    fURL::redirect();
+  }
+
+  /**
+   * @note For some reason the name field does not get created here. Some
+   *   logic may be causing it to be overwritten by the category_name field in
+   *   sCRUDForm.
+   */
+  public function adminEditBoard() {
+    try {
+      if (fRequest::isPost()) {
+        return $this->adminEditBoardPost();
+      }
+
+      $url = substr(fURL::get(), 14, -1);
+      $board = new Board(array('short_u_r_l' => $url));
+      $form = new sCRUDForm($board);
+      
+      $form->addField('name', __('Name'), 'textfield', array('required' => TRUE));
+      $form->enableCSRFField(TRUE);
+      $form->overrideLabel('short_u_r_l', __('Short URL'));
+      $form->hideFields('date_updated', 'date_created', 'timezone');
+      $form->setFieldOrder(array('name', 'category_name'));
+      $form->addAction('save', 'Save');
+      $form->addAction('continue', __('Save and Continue Editing'));
+      $form->addAction('delete', __('Delete'));
+
+      $content = $form->make();
+
+      sTemplate::render(array('content' => $content, 'title' => __('Board Edit')));
+    }
+    catch (fNotFoundException $e) {
       fURL::redirect('/not-found/');
     }
   }

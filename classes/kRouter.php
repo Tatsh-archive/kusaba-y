@@ -19,9 +19,11 @@ class kRouter {
    */
   private static $routes = array(
     '/' => 'FrontController::index',
-    '/login/' => 'AdminController::login',
     '/admin/' => 'AdminController::index',
+    '/admin/boards/' => 'BoardController::admin',
+    '/login/' => 'AdminController::login',
     '/logout/' => 'AdminController::logout',
+    '/not-found/' => 'NotFoundController::index',
   );
   
   /**
@@ -63,6 +65,7 @@ class kRouter {
       foreach ($urls as $short_url) {
         Moor::route('/'.$short_url.'/', 'BoardController::index');
         Moor::route('/'.$short_url.'/res/:id(\d+)', 'ThreadController::index'); // Reply path
+        Moor::route('/admin/boards/'.$short_url.'/', 'BoardController::adminEditBoard');
       }
 
       Moor::enableRestlessURLs();
