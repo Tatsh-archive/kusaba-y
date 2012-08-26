@@ -27,22 +27,13 @@ class BoardController extends MoorActionController {
     }
   }
 
-  /**
-   * @todo Move initialisation of HTMLPurifier and HTMLPurifier_Config to
-   *   elsewhere. Make configurable via file.
-   */
   public function makeBoardPost() {
     try {
       $validation = new fValidation;
       $storage_dir = new fDirectory('./files/images');
-      $config = HTMLPurifier_Config::createDefault();
-      
-      $config->set('Cache.SerializerPath', './files');
-      $config->set('AutoFormat.AutoParagraph', TRUE);
-      $date = new fDate('+1 day');
-      
-      $purifier = new HTMLPurifier($config);
+      $purifier = kCore::getHTMLPurifier();
       $html = $purifier->purify(fRequest::get('message'));
+      $date = new fDate('+1 week');
 
       if (!$html) {
         fRequest::set('message', '');
