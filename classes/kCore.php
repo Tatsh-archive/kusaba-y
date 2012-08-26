@@ -13,6 +13,11 @@ class kCore extends sCore {
   private static $settings = NULL;
 
   /**
+   * @var HTMLPurifier
+   */
+  private static $purifier = NULL;
+
+  /**
    * @return sCache
    */
   public static function getCache() {
@@ -108,6 +113,20 @@ class kCore extends sCore {
     }
 
     return $default_value;
+  }
+
+  /**
+   * @return HTMLPurifier
+   */
+  public static function getHTMLPurifier() {
+    if (self::$purifier === NULL) {
+      $config = HTMLPurifier_Config::createDefault();
+      $config->set('Cache.SerializerPath', self::getSetting('htmlpurifier.serializer_path', 'string', './files'));
+      $config->set('AutoFormat.AutoParagraph', TRUE);
+      self::$purifier = new HTMLPurifier($config);
+    }
+
+    return self::$purifier;
   }
 
   /**
