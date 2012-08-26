@@ -32,7 +32,7 @@ class kCore extends sCore {
    */
   public static function getDatabase() {
     if (self::$db === NULL) {
-      $ini = parse_ini_file('./config/database.ini', TRUE);
+      $ini = kYAML::decodeFile('./config/database.yml');
 
       if ($ini === FALSE || !isset($ini['database'])) {
         throw new fUnexpectedException('INI file not found or is invalid.');
