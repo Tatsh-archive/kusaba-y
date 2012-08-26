@@ -55,9 +55,9 @@ class kLoader extends sLoader {
     'File',
     'FAQ',
     'ImageFile',
-    'Reply',
     'SiteSetting',
     'Thread',
+    'Reply',
     'User',
   );
 

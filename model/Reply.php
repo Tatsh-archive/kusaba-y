@@ -1,5 +1,5 @@
 <?php
-class Reply extends fActiveRecord {
+class Reply extends Thread {
   protected function configure() {
     fORMDate::configureDateCreatedColumn($this, 'date_created');
     fORMDate::configureDateUpdatedColumn($this, 'date_updated');
@@ -10,17 +10,11 @@ class Reply extends fActiveRecord {
     return $this->getReplyId();
   }
 
-  public function hasValidImageFile() {
-    $image = $this->createImageFile();
+  public function encodeId() {
+    return $this->encodeReplyId();
+  }
 
-    if (!($image instanceof ImageFile)) {
-      return FALSE;
-    }
-
-    if ($image->getFilename() === ImageFile::NO_IMAGE_VALUE) {
-      return FALSE;
-    }
-
-    return TRUE;
+  public function encodeReplyURL() {
+    throw new fProgrammerException('"%s->%s" is not implemented because Reply object do not have replies.', __CLASS__, __FUNCTION__);
   }
 }
