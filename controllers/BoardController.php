@@ -72,12 +72,10 @@ class BoardController extends MoorActionController {
       if ($file !== NULL) {
         $image = new ImageFile;
         $image->setFilename($file);
-        $image->setFilenameThumb();
         $image->store();
         $thread->setImageFileId($image->getId());
       }
       else {
-        $image = ImageFile::getDefaultId();
         $thread->setImageFileId(ImageFile::getDefaultId());
       }
       
@@ -100,7 +98,8 @@ class BoardController extends MoorActionController {
 
     $title = $this->board->getName();
     $page = fRequest::get('page', 'integer', 1);
-    $boards = fRecordSet::build('Board', array(), array('name' => 'ASC'), 15, $page);
+    $limit = 15;
+    $boards = fRecordSet::build('Board', array(), array('short_u_r_l' => 'ASC'));
 
     sRequest::setPostValues(self::POST_KEY);
     
@@ -120,16 +119,23 @@ class BoardController extends MoorActionController {
     $form->setFieldAttributes('deletion_password', array('autocomplete' => 'off', 'value' => fCryptography::randomString(16)));
     $form->addField('image_files::filename', __('Image'), 'file', array('accept' => join(',', $this->default_image_types)));
     $form->addAction('submit', __('Submit'));
-    
+
+    $threads = fRecordSet::build('Thread', array(
+        'board_name=' => $title,
+      ),
+      array('date_updated' => 'DESC'),
+      $limit,
+      $page
+    );
+    $pagination = new fPagination($threads, $limit, $page);
     $content = sTemplate::buffer('board-header', array(
-      'boards' => fRecordSet::build('Board', array(), array('name' => 'ASC')),
+      'boards' => $boards,
     ));
     $content .= sTemplate::buffer('board-list', array(
-      'threads' => fRecordSet::build('Thread', array(
-        'board_name=' => $title,
-      ), array('date_updated' => 'DESC'), 15, $page),
+      'threads' => $threads,
       'last_validation_message' => fMessaging::retrieve('validation', fURL::get()),
       'board_form' => $form->make(),
+      'pagination' => $pagination->makeLinks(),
     ));
     
     sTemplate::render(array('title' => $title, 'content' => $content));
