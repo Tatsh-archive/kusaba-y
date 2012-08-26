@@ -23,6 +23,26 @@ class kCore extends sCore {
   private static $log_path = NULL;
 
   /**
+   * @var array
+   *
+   * @todo Move to configuration file.
+   */
+  private static $js_files = array(
+    'jquery-cdn-fallback.js',
+    'jquery.appear-r15.js',
+    'ky.load-images.js',
+  );
+
+  /**
+   * @var array
+   *
+   * @todo Move to configuration file.
+   */
+  private static $minified_js_files = array(
+    'jquery-cdn-fallback.min.js',
+  );
+
+  /**
    * @return sCache
    */
   public static function getCache() {
@@ -210,6 +230,18 @@ class kCore extends sCore {
     sTemplate::setSiteName(self::getSetting('site.name', 'string', __('{Kusaba-Y}: No site name')));
     sTemplate::setSiteSlogan(self::getSetting('site.slogan', 'string', ''));
     sTemplate::setMode(self::isProductionMode() ? 'production' : 'development');
+
+    sTemplate::enableQueryStrings(FALSE);
+
+    sTemplate::addJavaScriptFile('./files/js/modernizr.2.6.1.custom.js', 'head');
+    
+    foreach (self::$js_files as $file_suffix) {
+      sTemplate::addJavaScriptFile('./files/js/'.$file_suffix);
+    }
+
+    foreach (self::$minified_js_files as $file_suffix) {
+      sTemplate::addMinifiedJavaScriptFile('./files/js/'.$file_suffix);
+    }
   }
 
   public static function main() {
