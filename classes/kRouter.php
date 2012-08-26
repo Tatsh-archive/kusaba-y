@@ -45,7 +45,7 @@ class kRouter {
       $cache = kCore::getCache();
       $urls = $cache->get('boards.short_urls');
 
-      if (kCore::isProductionMode() && (!$urls || !is_array($urls))) {
+      if (!kCore::isProductionMode() || !$urls || !is_array($urls)) {
         $boards = fRecordSet::build('Board');
         $urls = array();
         
