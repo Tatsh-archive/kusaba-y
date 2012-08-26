@@ -20,4 +20,9 @@ class ImageFile extends fActiveRecord {
   public function getId() {
     return $this->getFileId();
   }
+
+  public static function getDefaultId() {
+    $set = fRecordSet::build(__CLASS__, array('filename=' => self::NO_IMAGE_VALUE), array(), 1, 1);
+    return $set[0]->getId();
+  }
 }

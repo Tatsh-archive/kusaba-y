@@ -44,6 +44,10 @@ class BoardController extends MoorActionController {
       $purifier = new HTMLPurifier($config);
       $html = $purifier->purify(fRequest::get('message'));
 
+      if (!$html) {
+        fRequest::set('message', '');
+      }
+
       $validation->addRequiredFields('title', 'message', 'deletion_password');
       $validation->validate();
 
@@ -63,11 +67,18 @@ class BoardController extends MoorActionController {
       $uploader->setOptional(TRUE);
       $file = $uploader->move($storage_dir, 'image_files::filename');
 
-      $image = new ImageFile;
-      $image->setFilename($file);
-      $image->store();
-
-      $thread->setImageFileId($image->getId());
+      if ($file !== NULL) {
+        $image = new ImageFile;
+        $image->setFilename($file);
+        $image->setFilenameThumb();
+        $image->store();
+        $thread->setImageFileId($image->getId());
+      }
+      else {
+        $image = ImageFile::getDefaultId();
+        $thread->setImageFileId(ImageFile::getDefaultId());
+      }
+      
       $thread->store();
 
       sRequest::deletePostValues(self::POST_KEY);
