@@ -18,7 +18,7 @@ class BoardController extends MoorActionController {
     $this->default_max_size = kCore::getSetting('posts.image_maximum_file_size', 'string', '10MB');
   }
 
-  public function getBoardByShortURL() {
+  private function getBoardByShortURL() {
     try {
       $url = substr(fURL::get(), 1, -1);
       $set = fRecordSet::build('Board', array('short_u_r_l=' => $url));
