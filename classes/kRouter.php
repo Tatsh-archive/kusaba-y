@@ -35,14 +35,26 @@ class kRouter {
    * Registers routes with Moor.
    *
    * @return void
+   * 
+   * @todo Cache board routes.
    */
   public static function registerRoutes() {
     if (self::$registered === FALSE) {
       foreach (self::$routes as $path => $cb) {
         Moor::route($path, $cb);
       }
+
+      // Every databased route must be registered as well
+      $boards = fRecordSet::build('Board');
+      foreach ($boards as $board) {
+        $short_url = $board->getShortURL();
+        Moor::route('/'.$short_url.'/', 'BoardController::index');
+        Moor::route('/'.$short_url.'/res/:id(\d+)', 'ThreadController::index'); // Reply path
+      }
+
       Moor::enableRestlessURLs();
       Moor::setNotFoundCallback('NotFoundController::index');
+      
       self::$registered = TRUE;
     }
   }
