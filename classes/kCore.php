@@ -117,7 +117,7 @@ class kCore extends sCore {
       $cache->set('settings', self::$settings, 7200);
     }
 
-    if (isset(self::$settings[$name])) {
+    if (array_key_exists($name, self::$settings)) {
       return self::cast(self::$settings[$name], $cast_to);
     }
     else {
