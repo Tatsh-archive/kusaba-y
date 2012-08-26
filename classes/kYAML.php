@@ -28,13 +28,14 @@ class kYAML {
         self::$decode_callback = 'yaml_parse';
         self::$encode_callback = 'yaml_emit';
       }
-      
-      throw new fProgrammerException('One of the following libraries or extensions must be installed to decode and encode YAML: %s. There is currently no built-in decoder/encoder in this class.', join(', ', array(
-        'syck (PECL)',
-        'Spyc (PHP)',
-        'Symfony YAML Component (PHP)',
-        'yaml (PECL)',
-      )));
+      else {
+        throw new fProgrammerException('One of the following libraries or extensions must be installed to decode and encode YAML: %s. There is currently no built-in decoder/encoder in this class.', join(', ', array(
+          'syck (PECL)',
+          'Spyc (PHP)',
+          'Symfony YAML Component (PHP)',
+          'yaml (PECL)',
+        )));
+      }
     }
   }
 
