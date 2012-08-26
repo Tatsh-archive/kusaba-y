@@ -78,7 +78,13 @@ class AdminController extends MoorActionController {
       fAuthorization::destroyUserInfo();
       return fURL::redirect('/login/');
     }
+
+    $content = sTemplate::buffer('admin-list', array(
+      'links' => array(
+          '/admin/boards/?reset' => fHTML::encode(__('Board Management')),
+        ),
+    ));
     
-    sTemplate::render(array('content' => '<p>Will be the admin page!</p>', 'title' => __('Administration')));
+    sTemplate::render(array('content' => $content, 'title' => __('Administration')));
   }
 }

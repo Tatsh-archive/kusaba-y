@@ -94,7 +94,7 @@ class BoardController extends MoorActionController {
 
       $content = $form->make();
 
-      sTemplate::render(array('content' => $content, 'title' => __('Board Edit')));
+      sTemplate::render(array('content' => $content, 'title' => __('Edit "!board"', array('!board' => $board->getName()))));
     }
     catch (fNotFoundException $e) {
       fURL::redirect('/not-found/');
