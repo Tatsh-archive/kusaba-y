@@ -13,7 +13,7 @@ class ImageFile extends fActiveRecord {
     fORMFile::configureImageUploadColumn($this, 'filename', './files/images');
     
     fORMFile::configureImageUploadColumn($this, 'filename_thumb', './files/images/thumbs');
-    fORMFile::addFImageMethodCall($this, 'filename_thumb', 'resize', array(250, 250));
+    fORMFile::addFImageMethodCall($this, 'filename_thumb', 'resize', array(250, NULL));
     fORMFile::configureColumnInheritance($this, 'filename_thumb', 'filename');
   }
 
