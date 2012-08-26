@@ -44,16 +44,19 @@ class kRouter {
 
       $cache = kCore::getCache();
       $urls = $cache->get('boards.short_urls');
+      $is_production_mode = kCore::isProductionMode();
 
-      if (!kCore::isProductionMode() || !$urls || !is_array($urls)) {
+      if (!$is_production_mode || !$urls || !is_array($urls)) {
         $boards = fRecordSet::build('Board');
         $urls = array();
         
         foreach ($boards as $board) {
           $urls[] = $board->getShortURL();
         }
-        
-        $cache->set('boards.short_urls', $urls);
+
+        if ($is_production_mode) {
+          $cache->set('boards.short_urls', $urls);
+        }
       }
 
       // Every databased route must be registered as well
