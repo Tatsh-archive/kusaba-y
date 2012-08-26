@@ -87,6 +87,10 @@ class kCore extends sCore {
       case 'boolean':
         $value = (bool)$value;
         break;
+
+      case 'string':
+        $value = (string)$value;
+        break;
     }
 
     return $value;
