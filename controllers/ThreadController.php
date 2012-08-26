@@ -129,6 +129,7 @@ class ThreadController extends MoorActionController {
       'thread' => $this->thread,
       'replies' => $replies,
       'pagination' => $pagination->makeLinks(),
+      'loading_img_src' => kCore::getSetting('posts.loading_image_source', 'string', '/files/images/loading.png'),
     ));
     
     sTemplate::render(array('content' => $content, 'title' => $title));

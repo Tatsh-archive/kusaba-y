@@ -210,6 +210,7 @@ class BoardController extends MoorActionController {
       'last_validation_message' => fMessaging::retrieve('validation', fURL::get()),
       'board_form' => $form->make(),
       'pagination' => $pagination->makeLinks(),
+      'loading_img_src' => kCore::getSetting('posts.loading_image_source', 'string', '/files/images/loading.png'),
     ));
     
     sTemplate::render(array('title' => $title, 'content' => $content));
