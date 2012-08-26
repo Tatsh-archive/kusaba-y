@@ -12,7 +12,7 @@ class kYAML {
       $sf_yaml_callback = array('Symfony\\Component\\Yaml\\Parser', 'parse');
       $sf_yaml_dump_callback = array('Symfony\\Component\\Yaml\\Dumper', 'dump');
       
-      if (!extension_loaded('syck')) {
+      if (extension_loaded('syck')) {
         self::$decode_callback = 'syck_load';
         self::$encode_callback = 'syck_dump';
       }
