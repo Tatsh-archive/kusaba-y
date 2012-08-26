@@ -82,10 +82,12 @@ CREATE TABLE boards (
   name VARCHAR(255) PRIMARY KEY,
   category_name VARCHAR(255) NOT NULL REFERENCES categories(name) ON DELETE RESTRICT ON UPDATE CASCADE,
   board_type VARCHAR(255) DEFAULT 'image' NOT NULL CHECK (board_type IN ('image', 'audio', 'video', 'file')),
+  short_u_r_l VARCHAR(16) NOT NULL,
   date_created TIMESTAMP NOT NULL,
   date_updated TIMESTAMP NOT NULL,
   timezone VARCHAR(64) NOT NULL
 );
+CREATE UNIQUE INDEX idx_boards_short_u_r_l ON boards (short_u_r_l);
 
 CREATE TABLE threads (
   thread_id INTEGER AUTOINCREMENT PRIMARY KEY,
