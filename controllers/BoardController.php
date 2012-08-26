@@ -3,16 +3,19 @@ class BoardController extends MoorActionController {
   const POST_KEY = 'BoardController::POST_KEY';
   
   private $board;
+  
+  private $default_image_types;
 
-  /**
-   * @todo Move accepted image types to configuration.
-   */
-  private $default_image_types = array('image/jpeg', 'image/gif', 'image/png');
-
-  private $default_max_size = '10MB';
+  private $default_max_size;
   
   public function beforeAction() {
     $this->board = $this->getBoardByShortURL();
+    $this->default_image_types = kCore::getSetting('posts.allowed_image_types', 'array', array(
+      'image/jpeg',
+      'image/gif',
+      'image/png'
+    ));
+    $this->default_max_size = kCore::getSetting('posts.image_maximum_file_size', 'string', '10MB');
   }
 
   public function getBoardByShortURL() {
@@ -20,6 +23,7 @@ class BoardController extends MoorActionController {
       $url = substr(fURL::get(), 1, -1);
       $set = fRecordSet::build('Board', array('short_u_r_l=' => $url));
       $set->tossIfEmpty();
+      
       return $set[0];
     }
     catch (fEmptySetException $e) {
@@ -30,10 +34,14 @@ class BoardController extends MoorActionController {
   public function makeBoardPost() {
     try {
       $validation = new fValidation;
-      $storage_dir = new fDirectory('./files/images');
+      $storage_dir = new fDirectory(kCore::getSetting(
+        'files.image_upload_directory',
+        'string',
+        './files/images'
+      ));
       $purifier = kCore::getHTMLPurifier();
       $html = $purifier->purify(fRequest::get('message'));
-      $date = new fDate('+1 week');
+      $date = new fDate(kCore::getSetting('posts.expiration_time', 'string', '+1 week'));
 
       if (!$html) {
         fRequest::set('message', '');
@@ -55,7 +63,12 @@ class BoardController extends MoorActionController {
       }
 
       $uploader = new fUpload;
-      $uploader->setMIMETypes($this->default_image_types, 'The file uploaded is not an image');
+      $uploader->setMIMETypes(
+        $this->default_image_types,
+        fText::compose('The file uploaded is not an image or is not an allowed type: %s',
+          join(', ', $this->default_image_types)
+        )
+      );
       $uploader->setMaxSize($this->default_max_size);
       $uploader->setOptional(TRUE);
       $file = $uploader->move($storage_dir, 'image_files::filename');
