@@ -18,6 +18,11 @@ class kCore extends sCore {
   private static $purifier = NULL;
 
   /**
+   * @var string
+   */
+  private static $log_path = NULL;
+
+  /**
    * @return sCache
    */
   public static function getCache() {
@@ -111,6 +116,18 @@ class kCore extends sCore {
     if (isset(self::$settings[$name])) {
       return self::cast(self::$settings[$name], $cast_to);
     }
+    else {
+      try {
+        $setting = new SiteSetting;
+        $setting->setName($name);
+        $setting->setValue($default_value);
+        $setting->setLastEditedUserId(1); // TODO Need better way to get an admin user here
+        $setting->store();
+        self::$settings = NULL;
+        $cache->delete('settings');
+      }
+      catch (fValidationException $e) {}
+    }
 
     return $default_value;
   }
@@ -133,7 +150,7 @@ class kCore extends sCore {
    * @return boolean
    */
   public static function isProductionMode() {
-    return self::getSetting('site.mode', 'boolean', FALSE);
+    return self::getSetting('site.production_mode', 'boolean', FALSE);
   }
 
   public static function setSetting($name, $value) {
@@ -169,10 +186,8 @@ class kCore extends sCore {
    * @return void
    */
   public static function debugCallback($message) {
-    $log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
-
-    if (is_file($log_path)) {
-      file_put_contents($log_path, $message."\n", LOCK_EX | FILE_APPEND);
+    if (is_file(self::$log_path)) {
+      file_put_contents(self::$log_path, $message."\n", LOCK_EX | FILE_APPEND);
     }
   }
 
@@ -196,10 +211,10 @@ class kCore extends sCore {
   public static function main() {
     parent::main();
     
-    $log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
-
-    self::enableErrorHandling($log_path);
-    self::enableExceptionHandling($log_path, self::exceptionClosingCallback);
+    self::$log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
+    
+    self::enableErrorHandling(self::$log_path);
+    self::enableExceptionHandling(self::$log_path, self::exceptionClosingCallback);
     self::registerDebugCallback(self::debugCallback);
     self::enableDebugging(!self::isProductionMode());
     self::configureTemplate();
