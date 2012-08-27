@@ -206,6 +206,7 @@ class BoardController extends MoorActionController {
       'boards' => $boards,
     ));
     $content .= sTemplate::buffer('board-list', array(
+      'title' => $title,
       'threads' => $threads,
       'last_validation_message' => fMessaging::retrieve('validation', fURL::get()),
       'board_form' => $form->make(),
