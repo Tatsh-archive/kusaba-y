@@ -25,7 +25,7 @@ class Thread extends fActiveRecord {
       return FALSE;
     }
 
-    return TRUE;
+    return $image->getFilename() instanceof fImage;
   }
 
   public function encodeReplyURL() {
