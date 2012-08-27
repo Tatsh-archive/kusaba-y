@@ -35,6 +35,11 @@ class kCore extends sCore {
 
   /**
    * @var array
+   */
+  private static $css_files = array();
+
+  /**
+   * @var array
    *
    * @todo Move to configuration file.
    */
@@ -242,12 +247,17 @@ class kCore extends sCore {
     foreach (self::$minified_js_files as $file_suffix) {
       sTemplate::addMinifiedJavaScriptFile('./files/js/'.$file_suffix);
     }
+
+    foreach (self::$css_files as $file) {
+      sTemplate::addCSSFile($file);
+    }
   }
 
   public static function main() {
     parent::main();
     
     self::$log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
+    self::$css_files = kYAML::decodeFile('./config/css.yml');
     
     self::enableErrorHandling(self::$log_path);
     self::enableExceptionHandling(self::$log_path, self::exceptionClosingCallback);
