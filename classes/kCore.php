@@ -26,7 +26,9 @@ class kCore extends sCore {
   private static $js_files = array(
     'jquery-cdn-fallback.js',
     'jquery.appear-r15.js',
+    'jquery.moveCursorToEnd.js',
     'ky.load-images.js',
+    'ky.quote.js',
   );
 
   /**
