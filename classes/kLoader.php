@@ -69,11 +69,11 @@ class kLoader extends sLoader {
    * @var array
    */
   private static $router_classes = array(
+    'AdminController',
     'BoardController',
     'FrontController',
     'NotFoundController',
     'ThreadController',
-    'UserController',
   );
 
   /**
