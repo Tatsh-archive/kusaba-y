@@ -117,6 +117,7 @@ class BoardController extends MoorActionController {
   }
 
   /**
+   * @param string $message
    * @return string
    */
   public static function fixIdReferences($message) {
