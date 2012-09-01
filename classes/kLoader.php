@@ -44,6 +44,7 @@ class kLoader extends sLoader {
    */
   private static $classes = array(
     'kCore',
+    'kHTML',
     'kRouter',
     'kYAML',
   );
