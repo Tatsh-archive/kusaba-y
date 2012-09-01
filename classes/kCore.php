@@ -23,6 +23,11 @@ class kCore extends sCore {
   private static $log_path = NULL;
 
   /**
+   * @var boolean
+   */
+  private static $log_file_exists = FALSE;
+
+  /**
    * @var array
    *
    * @todo Move to configuration file.
@@ -215,7 +220,7 @@ class kCore extends sCore {
    * @return void
    */
   public static function debugCallback($message) {
-    if (is_file(self::$log_path)) {
+    if (self::$log_file_exists) {
       file_put_contents(self::$log_path, $message."\n", LOCK_EX | FILE_APPEND);
     }
   }
@@ -257,6 +262,7 @@ class kCore extends sCore {
     parent::main();
     
     self::$log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
+    self::$log_file_exists = is_file(self::$log_path);
     self::$css_files = kYAML::decodeFile('./config/css.yml');
     
     self::enableErrorHandling(self::$log_path);
