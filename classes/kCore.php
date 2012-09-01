@@ -258,7 +258,9 @@ class kCore extends sCore {
    * @internal
    */
   public static function closeLogHandle() {
-    fclose(self::$log_file_handle);
+    if (self::$log_file_handle !== NULL) {
+      fclose(self::$log_file_handle);
+    }
   }
 
   public static function main() {
