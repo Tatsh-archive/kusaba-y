@@ -104,6 +104,42 @@ class BoardController extends MoorActionController {
     }
   }
 
+  /**
+   * @return Thread|Reply
+   */
+  private static function getThreadOrReply($id) {
+    try {
+      return new Thread($id);
+    }
+    catch (fNotFoundException $e) {
+      return new Reply($id);
+    }
+  }
+
+  /**
+   * @return string
+   */
+  public static function fixIdReferences($message) {
+    $lines = explode("\n", $message);
+
+    foreach ($lines as $key => $line) {
+      $line = trim($line);
+      $gt = substr($line, 0, 2);
+      $id = substr($line, 2);
+
+      if ($gt === '>>' && is_numeric($id)) {
+        try {
+          $object = self::getThreadOrReply($id);
+          $type = $object instanceof Thread ? 'thread' : 'reply';
+          $lines[$key] = '>>'.sHTML::tag('a', array('href' => '#', 'data-'.$type.'-id' => $id), $id).'<br>';
+        }
+        catch (fNotFoundException $e) {}
+      }
+    }
+
+    return join("\n", $lines);
+  }
+
   public function makeBoardPost() {
     try {
       $validation = new fValidation;
@@ -112,7 +148,8 @@ class BoardController extends MoorActionController {
         'string',
         './files/images'
       ));
-      $html = kHTML::prepare(fRequest::get('message'));
+      $message = BoardController::fixIdReferences(fRequest::get('message'));
+      $html = kHTML::prepare($message);
       $date = new fDate(kCore::getSetting('posts.expiration_time', 'string', '+1 week'));
 
       if (!$html) {
