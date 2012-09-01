@@ -49,9 +49,9 @@ class kYAML {
     return call_user_func(self::$decode_callback, $string);
   }
 
-  public static function encode($string) {
+  public static function encode($arg) {
     self::findCallbacks();
-    return call_user_func(self::$encode_callback, $string);
+    return call_user_func(self::$encode_callback, $arg);
   }
 
   public static function sendHeader() {
