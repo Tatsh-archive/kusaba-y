@@ -6,6 +6,7 @@ class kCore extends sCore {
   const getDatabase              = 'kCore::getDatabase';
   const getSetting               = 'kCore::getSetting';
   const isProductionMode         = 'kCore::isProductionMode';
+  const closeLogHandle           = 'kCore::closeLogHandle';
   
   /**
    * @var array
@@ -13,14 +14,14 @@ class kCore extends sCore {
   private static $settings = NULL;
 
   /**
-   * @var HTMLPurifier
-   */
-  private static $purifier = NULL;
-
-  /**
    * @var string
    */
   private static $log_path = NULL;
+
+  /**
+   * @var resource
+   */
+  private static $log_file_handle = NULL;
 
   /**
    * @var boolean
@@ -167,20 +168,6 @@ class kCore extends sCore {
   }
 
   /**
-   * @return HTMLPurifier
-   */
-  public static function getHTMLPurifier() {
-    if (self::$purifier === NULL) {
-      $config = HTMLPurifier_Config::createDefault();
-      $config->set('Cache.SerializerPath', self::getSetting('htmlpurifier.serializer_path', 'string', './files'));
-      $config->set('AutoFormat.AutoParagraph', TRUE);
-      self::$purifier = new HTMLPurifier($config);
-    }
-
-    return self::$purifier;
-  }
-
-  /**
    * @return boolean
    */
   public static function isProductionMode() {
@@ -220,8 +207,8 @@ class kCore extends sCore {
    * @return void
    */
   public static function debugCallback($message) {
-    if (self::$log_file_exists) {
-      file_put_contents(self::$log_path, $message."\n", LOCK_EX | FILE_APPEND);
+    if (self::$log_file_handle !== NULL) {
+      fwrite(self::$log_file_handle, $message."\n");
     }
   }
 
@@ -235,6 +222,8 @@ class kCore extends sCore {
   }
 
   public static function configureTemplate() {
+    self::$css_files = kYAML::decodeFile('./config/css.yml');
+
     sTemplate::setCache(self::getCache());
     sTemplate::setActiveTemplate(self::getSetting('template.name','string', 'kusaba-default'));
     sTemplate::setSiteName(self::getSetting('site.name', 'string', __('{Kusaba-Y}: No site name')));
@@ -258,17 +247,34 @@ class kCore extends sCore {
     }
   }
 
+  /**
+   * @internal
+   */
+  public static function configureLogging() {
+    $log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
+    
+    if (is_file($log_path)) {
+      self::$log_file_handle = fopen($log_path, 'a');
+    }
+    
+    register_shutdown_function(self::callback(self::closeLogHandle));
+    self::enableErrorHandling($log_path);
+    self::enableExceptionHandling($log_path, self::exceptionClosingCallback);
+    self::registerDebugCallback(self::debugCallback);
+    self::enableDebugging(!self::isProductionMode());
+  }
+
+  /**
+   * @internal
+   */
+  public static function closeLogHandle() {
+    fclose(self::$log_file_handle);
+  }
+
   public static function main() {
     parent::main();
     
-    self::$log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
-    self::$log_file_exists = is_file(self::$log_path);
-    self::$css_files = kYAML::decodeFile('./config/css.yml');
-    
-    self::enableErrorHandling(self::$log_path);
-    self::enableExceptionHandling(self::$log_path, self::exceptionClosingCallback);
-    self::registerDebugCallback(self::debugCallback);
-    self::enableDebugging(!self::isProductionMode());
+    self::configureLogging();
     self::configureTemplate();
     
     kRouter::run();
