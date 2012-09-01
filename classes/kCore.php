@@ -14,19 +14,9 @@ class kCore extends sCore {
   private static $settings = NULL;
 
   /**
-   * @var string
-   */
-  private static $log_path = NULL;
-
-  /**
    * @var resource
    */
   private static $log_file_handle = NULL;
-
-  /**
-   * @var boolean
-   */
-  private static $log_file_exists = FALSE;
 
   /**
    * @var array
