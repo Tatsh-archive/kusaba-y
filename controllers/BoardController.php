@@ -51,14 +51,17 @@ class BoardController extends MoorActionController {
       return $this->adminPost();
     }
 
+    $title = __('Board Management');
     $sort_column = fCRUD::getSortColumn(array('name', 'short_u_r_l'));
     $sort = fCRUD::getSortDirection('asc');
     fCRUD::redirectWithLoadedValues();
 
+    $nav = AdminController::getLinksHTML();
+    $header = sTemplate::buffer('header-h1', array('text' => $title));
     $boards = fRecordSet::build('Board', array(), array($sort_column => $sort));
     $content = sTemplate::buffer('admin-boards-list', array('boards' => $boards));
 
-    sTemplate::render(array('content' => $content, 'title' => 'Boards'));
+    sTemplate::render(array('content' => $header.$nav.$content, 'title' => $title));
   }
 
   /**
