@@ -109,8 +109,7 @@ class BoardController extends MoorActionController {
         'string',
         './files/images'
       ));
-      $purifier = kCore::getHTMLPurifier();
-      $html = $purifier->purify(fRequest::get('message'));
+      $html = kHTML::prepare(fRequest::get('message'));
       $date = new fDate(kCore::getSetting('posts.expiration_time', 'string', '+1 week'));
 
       if (!$html) {

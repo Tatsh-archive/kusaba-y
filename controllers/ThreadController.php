@@ -31,8 +31,7 @@ class ThreadController extends MoorActionController {
       $validation = new fValidation;
       $storage_dir = new fDirectory('./files/images');
       $date = new fDate('+1 day');
-      $purifier = kCore::getHTMLPurifier();
-      $html = $purifier->purify(fRequest::get('message'));
+      $html = kHTML::prepare(fRequest::get('message'));
 
       if (!$html) {
         fRequest::set('message', '');
