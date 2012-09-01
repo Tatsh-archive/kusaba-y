@@ -1,12 +1,12 @@
 <?php
 class kCore extends sCore {
+  const closeLogHandle           = 'kCore::closeLogHandle';
   const debugCallback            = 'kCore::debugCallback';
   const exceptionClosingCallback = 'kCore::exceptionClosingCallback';
   const getCache                 = 'kCore::getCache';
   const getDatabase              = 'kCore::getDatabase';
   const getSetting               = 'kCore::getSetting';
   const isProductionMode         = 'kCore::isProductionMode';
-  const closeLogHandle           = 'kCore::closeLogHandle';
   
   /**
    * @var array
