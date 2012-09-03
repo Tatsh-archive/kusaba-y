@@ -191,7 +191,7 @@ class BoardController extends MoorActionController {
             break;
         }
 
-        $fimage->rename($image->getUniqueId().'.'.$extension);
+        $fimage->rename($image->getUniqueId().'.'.$extension, FALSE);
         $image->store();
         $image_id = $image->getId();
       }
@@ -199,7 +199,7 @@ class BoardController extends MoorActionController {
         fCore::debug(sprintf('Caught not found exception with message: "%s"', strip_tags($e->getMessage())));
       }
 
-            $thread->setImageFileId($image_id);
+      $thread->setImageFileId($image_id);
       $thread->store();
 
       sRequest::deletePostValues(self::POST_KEY);
