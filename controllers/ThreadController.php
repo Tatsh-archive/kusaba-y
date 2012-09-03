@@ -33,6 +33,7 @@ class ThreadController extends MoorActionController {
       $date = new fDate('+1 day');
       $message = BoardController::fixIdReferences(fRequest::get('message'));
       $html = kHTML::prepare($message);
+      $image_id = NULL;
 
       if (!$html) {
         fRequest::set('message', '');
@@ -48,29 +49,39 @@ class ThreadController extends MoorActionController {
       $thread->setMessage($html);
       $thread->setThreadId($this->thread->getId());
 
+      try {
+        $image = $thread->createImageFile();
+        $fimage = $image->uploadFilename();
+
+        if ($fimage instanceof fImage) {
+          $image->setOriginalFilename($fimage->getName());
+          $image->validate();
+
+          $mime = $fimage->getMimeType();
+          $extension = 'jpeg';
+          switch ($mime) {
+            case 'image/png':
+              $extension = 'png';
+              break;
+
+            case 'image/gif':
+              $extension = 'gif';
+              break;
+          }
+
+          $fimage->rename($image->getUniqueId().'.'.$extension, FALSE);
+          $image->store();
+          $image_id = $image->getId();
+        }
+      }
+      catch (fNotFoundException $e) {
+        fCore::debug(sprintf('Caught not found exception with message: "%s"', strip_tags($e->getMessage())));
+      }
+
+      $thread->setImageFileId($image_id);
+
       if (strtolower($thread->getName()) !== 'anonymous') {
         $thread->setIsAnonymous(FALSE);
-      }
-
-      $uploader = new fUpload;
-      $uploader->setMIMETypes(
-        $this->default_image_types,
-        fText::compose('The file uploaded is not an image or is not an allowed type: %s',
-          join(', ', $this->default_image_types)
-        )
-      );
-      $uploader->setMaxSize($this->default_max_size);
-      $uploader->setOptional(TRUE);
-      $file = $uploader->move($storage_dir, 'image_files::filename');
-
-      if ($file !== NULL) {
-        $image = new ImageFile;
-        $image->setFilename($file);
-        $image->store();
-        $thread->setImageFileId($image->getId());
-      }
-      else {
-        $thread->setImageFileId(ImageFile::getDefaultId());
       }
 
       $thread->store();
@@ -109,7 +120,7 @@ class ThreadController extends MoorActionController {
     ));
     $form->setFieldAttributes('title', array('autocomplete' => 'off'));
     $form->setFieldAttributes('deletion_password', array('autocomplete' => 'off', 'value' => fCryptography::randomString(16)));
-    $form->addField('image_files::filename', __('Image'), 'file', array('accept' => join(',', $this->default_image_types)));
+    $form->addField('filename', __('Image'), 'file', array('accept' => join(',', $this->default_image_types)));
     $form->enableCSRFField(TRUE);
     $form->addAction('submit', __('Submit'));
 
