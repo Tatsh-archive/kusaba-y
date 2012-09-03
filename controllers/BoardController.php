@@ -149,7 +149,7 @@ class BoardController extends MoorActionController {
         'string',
         './files/images'
       ));
-      $message = BoardController::fixIdReferences(fRequest::get('message'));
+      $message = self::fixIdReferences(fRequest::get('message'));
       $html = kHTML::prepare($message);
       $date = new fDate(kCore::getSetting('posts.expiration_time', 'string', '+1 week'));
 
