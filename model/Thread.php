@@ -15,17 +15,7 @@ class Thread extends fActiveRecord {
   }
 
   public function hasValidImageFile() {
-    $image = $this->createImageFile();
-
-    if (!($image instanceof ImageFile)) {
-      return FALSE;
-    }
-
-    if ($image->getFilename() === ImageFile::NO_IMAGE_VALUE) {
-      return FALSE;
-    }
-
-    return $image->getFilename() instanceof fImage;
+    return $this->createImageFile()->getFilename() instanceof fImage;
   }
 
   public function encodeReplyURL() {
