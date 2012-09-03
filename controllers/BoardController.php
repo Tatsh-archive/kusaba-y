@@ -162,6 +162,7 @@ class BoardController extends MoorActionController {
       $validation->addEmailFields('email_address');
       $validation->validate();
 
+      $image_id = NULL;
       $thread = new Thread;
       $thread->populate();
       $thread->setMessage($html);
@@ -172,27 +173,33 @@ class BoardController extends MoorActionController {
         $thread->setIsAnonymous(FALSE);
       }
 
-      $uploader = new fUpload;
-      $uploader->setMIMETypes(
-        $this->default_image_types,
-        fText::compose('The file uploaded is not an image or is not an allowed type: %s',
-          join(', ', $this->default_image_types)
-        )
-      );
-      $uploader->setMaxSize($this->default_max_size);
-      $uploader->setOptional(TRUE);
-      $file = $uploader->move($storage_dir, 'image_files::filename');
+      try {
+        $image = $thread->createImageFile();
+        $fimage = $image->uploadFilename();
+        $image->setOriginalFilename($fimage->getName());
+        $image->validate();
 
-      if ($file !== NULL) {
-        $image = new ImageFile;
-        $image->setFilename($file);
+        $mime = $fimage->getMimeType();
+        $extension = 'jpeg';
+        switch ($mime) {
+          case 'image/png':
+            $extension = 'png';
+            break;
+
+          case 'image/gif':
+            $extension = 'gif';
+            break;
+        }
+
+        $fimage->rename($image->getUniqueId().'.'.$extension);
         $image->store();
-        $thread->setImageFileId($image->getId());
+        $image_id = $image->getId();
       }
-      else {
-        $thread->setImageFileId(ImageFile::getDefaultId());
+      catch (fNotFoundException $e) {
+        fCore::debug(sprintf('Caught not found exception with message: "%s"', strip_tags($e->getMessage())));
       }
-      
+
+            $thread->setImageFileId($image_id);
       $thread->store();
 
       sRequest::deletePostValues(self::POST_KEY);
@@ -231,7 +238,7 @@ class BoardController extends MoorActionController {
     $form->enableCSRFField(TRUE);
     $form->setFieldAttributes('title', array('autocomplete' => 'off'));
     $form->setFieldAttributes('deletion_password', array('autocomplete' => 'off', 'value' => fCryptography::randomString(16)));
-    $form->addField('image_files::filename', __('Image'), 'file', array('accept' => join(',', $this->default_image_types)));
+    $form->addField('filename', __('Image'), 'file', array('accept' => join(',', $this->default_image_types)));
     $form->addAction('submit', __('Submit'));
 
     $threads = fRecordSet::build('Thread', array(
