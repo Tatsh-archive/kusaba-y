@@ -28,22 +28,23 @@ DROP TABLE IF EXISTS files;
 CREATE TABLE files (
   file_id INTEGER AUTOINCREMENT PRIMARY KEY,
   filename VARCHAR(255) NOT NULL,
+  original_filename VARCHAR(255) NOT NULL,                    
   mime_type VARCHAR(128) DEFAULT 'application/octet-stream' NOT NULL,
   date_created TIMESTAMP NOT NULL,
   date_updated TIMESTAMP NOT NULL,
   timezone VARCHAR(64) NOT NULL
 );
-INSERT INTO files (file_id, filename, date_created, date_updated) VALUES (1, '###none', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 CREATE TABLE image_files (
   file_id INTEGER AUTOINCREMENT PRIMARY KEY,
+  unique_id VARCHAR(16) NOT NULL,
+  original_filename VARCHAR(255) NOT NULL,
   filename VARCHAR(255) NOT NULL,
   filename_thumb VARCHAR(255) NOT NULL,
   date_created TIMESTAMP NOT NULL,
   date_updated TIMESTAMP NOT NULL,
   timezone VARCHAR(64) NOT NULL
 );
-INSERT INTO image_files (file_id, filename, filename_thumb, date_created, date_updated) VALUES (1, '###none', '###none', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 CREATE TABLE users (
   user_id INTEGER AUTOINCREMENT PRIMARY KEY,
@@ -98,8 +99,8 @@ CREATE TABLE threads (
   board_name VARCHAR(255) NOT NULL REFERENCES boards(name) ON DELETE RESTRICT ON UPDATE CASCADE,
   is_anonymous BOOLEAN DEFAULT 1 NOT NULL,
   deletion_password VARCHAR(255) NOT NULL,
-  file_id INTEGER DEFAULT 1 NOT NULL REFERENCES files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-  image_file_id INTEGER DEFAULT 1 NOT NULL REFERENCES image_files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  file_id INTEGER DEFAULT NULL NULL REFERENCES files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  image_file_id INTEGER DEFAULT NULL NULL REFERENCES image_files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   expiration_time TIMESTAMP NOT NULL,
   date_created TIMESTAMP NOT NULL,
   date_updated TIMESTAMP NOT NULL,
@@ -115,8 +116,8 @@ CREATE TABLE replies (
   thread_id INTEGER NOT NULL REFERENCES threads(thread_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   is_anonymous BOOLEAN DEFAULT 1 NOT NULL,
   deletion_password VARCHAR(255) NOT NULL,
-  file_id INTEGER DEFAULT 1 NOT NULL REFERENCES files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-  image_file_id INTEGER DEFAULT 1 NOT NULL REFERENCES image_files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  file_id INTEGER DEFAULT NULL NULL REFERENCES files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  image_file_id INTEGER DEFAULT NULL NULL REFERENCES image_files(file_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   date_created TIMESTAMP NOT NULL,
   date_updated TIMESTAMP NOT NULL,
   timezone VARCHAR(64) NOT NULL
