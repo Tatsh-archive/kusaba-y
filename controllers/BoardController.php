@@ -176,24 +176,27 @@ class BoardController extends MoorActionController {
       try {
         $image = $thread->createImageFile();
         $fimage = $image->uploadFilename();
-        $image->setOriginalFilename($fimage->getName());
-        $image->validate();
 
-        $mime = $fimage->getMimeType();
-        $extension = 'jpeg';
-        switch ($mime) {
-          case 'image/png':
-            $extension = 'png';
-            break;
+        if ($fimage instanceof fImage) {
+          $image->setOriginalFilename($fimage->getName());
+          $image->validate();
 
-          case 'image/gif':
-            $extension = 'gif';
-            break;
+          $mime = $fimage->getMimeType();
+          $extension = 'jpeg';
+          switch ($mime) {
+            case 'image/png':
+              $extension = 'png';
+              break;
+
+            case 'image/gif':
+              $extension = 'gif';
+              break;
+          }
+
+          $fimage->rename($image->getUniqueId().'.'.$extension, FALSE);
+          $image->store();
+          $image_id = $image->getId();
         }
-
-        $fimage->rename($image->getUniqueId().'.'.$extension, FALSE);
-        $image->store();
-        $image_id = $image->getId();
       }
       catch (fNotFoundException $e) {
         fCore::debug(sprintf('Caught not found exception with message: "%s"', strip_tags($e->getMessage())));
