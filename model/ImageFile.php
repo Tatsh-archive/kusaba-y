@@ -1,6 +1,6 @@
 <?php
 class ImageFile extends fActiveRecord {
-  const NO_IMAGE_VALUE = '###none';
+  const makeUniqueId = 'ImageFile::makeUniqueId';
 
   /**
    * @todo Move file upload column path to configuration.
@@ -15,6 +15,8 @@ class ImageFile extends fActiveRecord {
     fORMFile::configureImageUploadColumn($this, 'filename_thumb', './files/images/thumbs');
     fORMFile::addFImageMethodCall($this, 'filename_thumb', 'resize', array(250, NULL));
     fORMFile::configureColumnInheritance($this, 'filename_thumb', 'filename');
+
+    fORM::registerHookCallback($this, 'pre::validate()', self::makeUniqueId);
   }
 
   public function getId() {
@@ -25,8 +27,30 @@ class ImageFile extends fActiveRecord {
     return $this->encodeFileId();
   }
 
-  public static function getDefaultId() {
-    $set = fRecordSet::build(__CLASS__, array('filename=' => self::NO_IMAGE_VALUE), array(), 1, 1);
-    return $set[0]->getId();
+  /**
+   * @internal
+   *
+   * @param ImageFile $object
+   * @param array $values
+   * @param array $old_values
+   */
+  public static function makeUniqueId($object, &$values, &$old_values) {
+    if (fActiveRecord::hasOld($old_values, 'unique_id')) {
+      return;
+    }
+
+    $records = fRecordSet::build(__CLASS__);
+    $ids = array();
+    $id = fCryptography::randomString(16, 'numeric');
+
+    foreach ($records as $record) {
+      $ids[] = $record->getUniqueId();
+    }
+
+    while (in_array($id, $ids)) {
+      $id = fCryptography::randomString(16, 'numeric');
+    }
+
+    fActiveRecord::assign($values, $old_values, 'unique_id', $id);
   }
 }
