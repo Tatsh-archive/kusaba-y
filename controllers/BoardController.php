@@ -141,6 +141,19 @@ class BoardController extends MoorActionController {
     return join("\n", $lines);
   }
 
+  /**
+   * @internal
+   */
+  public static function validateRecaptchaResponse($response) {
+    try {
+      self::configureRecaptcha();
+      $response = recaptcha::checkAnswer($_SERVER['REMOTE_ADDR'], fRequest::get('recaptcha_challenge_field'), $response);
+      return isset($response['is_valid']) ? $response['is_valid'] === TRUE : FALSE;
+    }
+    catch (recaptchaException $e) {}
+    return FALSE;
+  }
+
   public function makeBoardPost() {
     try {
       $validation = new fValidation;
@@ -160,6 +173,7 @@ class BoardController extends MoorActionController {
       $validation->addRequiredFields('title', 'message', 'deletion_password');
       $validation->setCSRFTokenField('csrf');
       $validation->addEmailFields('email_address');
+      $validation->addCallbackRule('recaptcha_response_field', __CLASS__.'::validateRecaptchaResponse', __('The value entered does not match the text'));
       $validation->validate();
 
       $image_id = NULL;
@@ -215,6 +229,13 @@ class BoardController extends MoorActionController {
     }
   }
 
+  public static function configureRecaptcha() {
+    $captcha = kYAML::decodeFile('./config/recaptcha.yml');
+    recaptcha::setPrivateKey($captcha['private_key']);
+    recaptcha::setPublicKey($captcha['public_key']);
+    recaptcha::registerComposeCallback('__');
+  }
+
   public function index() {
     if (fRequest::isPost()) {
       return $this->makeBoardPost();
@@ -226,6 +247,7 @@ class BoardController extends MoorActionController {
     $boards = fRecordSet::build('Board', array(), array('short_u_r_l' => 'ASC'));
 
     sRequest::setPostValues(self::POST_KEY);
+    self::configureRecaptcha();
     
     $form = new sCRUDForm('Thread');
     $form->hideFields(array(
@@ -242,6 +264,13 @@ class BoardController extends MoorActionController {
     $form->setFieldAttributes('title', array('autocomplete' => 'off'));
     $form->setFieldAttributes('deletion_password', array('autocomplete' => 'off', 'value' => fCryptography::randomString(16)));
     $form->addField('filename', __('Image'), 'file', array('accept' => join(',', $this->default_image_types)));
+    $form->addField('verification', '', 'hidden');
+    $form->replaceHTML('verification', join('', array(
+      '<div class="form-field-container">',
+        '<label class="form-label">'.fHTML::encode(__('Verification')).'</label>',
+        recaptcha::getHTML(),
+      '</div>',
+    )));
     $form->addAction('submit', __('Submit'));
 
     $threads = fRecordSet::build('Thread', array(
