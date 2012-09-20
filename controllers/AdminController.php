@@ -6,7 +6,7 @@ class AdminController extends MoorActionController {
    * @var User
    */
   private static $user = NULL;
-  
+
   public function login() {
     if (fAuthorization::checkLoggedIn()) {
       return fURL::redirect('/admin/');
@@ -17,7 +17,7 @@ class AdminController extends MoorActionController {
     }
 
     sRequest::setPostValues(self::LOGIN_POST_KEY);
-    
+
     $content = sTemplate::buffer('login-form', array('csrf' => fRequest::generateCSRFToken()));
     sTemplate::render(array('content' => $content, 'title' => __('Log in')));
   }
@@ -44,7 +44,7 @@ class AdminController extends MoorActionController {
     try {
       $message = __('User name or password is incorrect.');
       $validation = new fValidation;
-      
+
       $validation->addRequiredFields('name', 'user_password', 'csrf');
       $validation->setCSRFTokenField('csrf');
       $validation->addCallbackRule('name', kCore::callback(__CLASS__.'::userExists'), $message);
@@ -89,7 +89,7 @@ class AdminController extends MoorActionController {
 
     $content = sTemplate::buffer('header-h1', array('text' => __('Administration')));
     $content .= self::getLinksHTML();
-    
+
     sTemplate::render(array('content' => $content, 'title' => __('Administration')));
   }
 }

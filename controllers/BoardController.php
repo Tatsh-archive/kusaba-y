@@ -1,13 +1,15 @@
 <?php
 class BoardController extends MoorActionController {
+  const validateRecaptchaResponse = 'BoardController::validateRecaptchaResponse';
+
   const POST_KEY = 'BoardController::POST_KEY';
-  
+
   private $board;
-  
+
   private $default_image_types;
 
   private $default_max_size;
-  
+
   public function beforeAction() {
     $this->board = $this->getBoardByShortURL();
     $this->default_image_types = kCore::getSetting('posts.allowed_image_types', 'array', array(
@@ -30,7 +32,7 @@ class BoardController extends MoorActionController {
       $url = substr($url, 1, -1);
       $set = fRecordSet::build('Board', array('short_u_r_l=' => $url));
       $set->tossIfEmpty();
-      
+
       return $set[0];
     }
     catch (fEmptySetException $e) {
@@ -85,7 +87,7 @@ class BoardController extends MoorActionController {
       $url = substr(fURL::get(), 14, -1);
       $board = new Board(array('short_u_r_l' => $url));
       $form = new sCRUDForm($board);
-      
+
       $form->addField('name', __('Name'), 'textfield', array('required' => TRUE));
       $form->enableCSRFField(TRUE);
       $form->overrideLabel('short_u_r_l', __('Short URL'));
@@ -248,7 +250,7 @@ class BoardController extends MoorActionController {
 
     sRequest::setPostValues(self::POST_KEY);
     self::configureRecaptcha();
-    
+
     $form = new sCRUDForm('Thread');
     $form->hideFields(array(
       'board_name',
@@ -292,7 +294,7 @@ class BoardController extends MoorActionController {
       'pagination' => $pagination->makeLinks(),
       'loading_img_src' => kCore::getSetting('posts.loading_image_source', 'string', '/files/images/loading.png'),
     ));
-    
+
     sTemplate::render(array('title' => $title, 'content' => $content));
   }
 }
