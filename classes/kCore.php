@@ -7,7 +7,7 @@ class kCore extends sCore {
   const getDatabase              = 'kCore::getDatabase';
   const getSetting               = 'kCore::getSetting';
   const isProductionMode         = 'kCore::isProductionMode';
-  
+
   /**
    * @var array
    */
@@ -20,16 +20,8 @@ class kCore extends sCore {
 
   /**
    * @var array
-   *
-   * @todo Move to configuration file.
    */
-  private static $js_files = array(
-    'jquery-cdn-fallback.js',
-    'jquery.appear-r15.js',
-    'jquery.moveCursorToEnd.js',
-    'ky.load-images.js',
-    'ky.quote.js',
-  );
+  private static $js_files = array();
 
   /**
    * @var array
@@ -38,12 +30,8 @@ class kCore extends sCore {
 
   /**
    * @var array
-   *
-   * @todo Move to configuration file.
    */
-  private static $minified_js_files = array(
-    'jquery-cdn-fallback.min.js',
-  );
+  private static $minified_js_files = array();
 
   /**
    * @return sCache
@@ -65,7 +53,7 @@ class kCore extends sCore {
       if ($ini === FALSE || !isset($ini['database'])) {
         throw new fUnexpectedException('INI file not found or is invalid.');
       }
-      
+
       $ini = $ini['database'];
       $required_keys = array('type', 'name', 'user', 'password', 'host');
 
@@ -124,7 +112,7 @@ class kCore extends sCore {
    */
   public static function getSetting($name, $cast_to = NULL, $default_value = NULL) {
     $cache = self::getCache();
-    
+
     if (self::$settings === NULL) {
       self::$settings = $cache->get('settings');
     }
@@ -214,7 +202,15 @@ class kCore extends sCore {
   }
 
   public static function configureTemplate() {
+    $js_yaml = kYAML::decodeFile('./config/js.yml');
+
+    if (!isset($js_yaml['development']) || !isset($js_yaml['production'])) {
+      throw new fProgrammerException('JavaScript YAML file must have sections with "development" and "production", both of which must be of type array (and not object)');
+    }
+
     self::$css_files = kYAML::decodeFile('./config/css.yml');
+    self::$js_files = $js_yaml['development'];
+    self::$minified_js_files = $js_yaml['production'];
 
     sTemplate::setCache(self::getCache());
     sTemplate::setActiveTemplate(self::getSetting('template.name','string', 'kusaba-default'));
@@ -225,7 +221,7 @@ class kCore extends sCore {
     sTemplate::enableQueryStrings(FALSE);
 
     sTemplate::addJavaScriptFile('./files/js/modernizr.2.6.1.custom.js', 'head');
-    
+
     foreach (self::$js_files as $file_suffix) {
       sTemplate::addJavaScriptFile('./files/js/'.$file_suffix);
     }
@@ -244,11 +240,11 @@ class kCore extends sCore {
    */
   public static function configureLogging() {
     $log_path = self::getSetting('site.error-log-destination', 'string', '/var/log/sutra/kusaba-y.log');
-    
+
     if (is_file($log_path)) {
       self::$log_file_handle = fopen($log_path, 'a');
     }
-    
+
     register_shutdown_function(self::callback(self::closeLogHandle));
     self::enableErrorHandling($log_path);
     self::enableExceptionHandling($log_path, self::exceptionClosingCallback);
@@ -267,10 +263,10 @@ class kCore extends sCore {
 
   public static function main() {
     parent::main();
-    
+
     self::configureLogging();
     self::configureTemplate();
-    
+
     kRouter::run();
   }
 }
