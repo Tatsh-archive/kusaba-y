@@ -25,7 +25,7 @@ class kRouter {
     '/logout/' => 'AdminController::logout',
     '/not-found/' => 'NotFoundController::index',
   );
-  
+
   /**
    * If routes have been registered.
    *
@@ -51,7 +51,7 @@ class kRouter {
       if (!$is_production_mode || !$urls || !is_array($urls)) {
         $boards = fRecordSet::build('Board');
         $urls = array();
-        
+
         foreach ($boards as $board) {
           $urls[] = $board->getShortURL();
         }
@@ -70,8 +70,33 @@ class kRouter {
 
       Moor::enableRestlessURLs();
       Moor::setNotFoundCallback('NotFoundController::index');
-      
+
       self::$registered = TRUE;
+    }
+  }
+
+  /**
+   * Redirects URLs with any known PHP GUID strings.
+   *
+   * @return void
+   */
+  private static function redirectGUID() {
+    $guids = array(
+      preg_quote('PHPE9568F34-D428-11d2-A769-00AA001ACF42', '/'),
+      preg_quote('PHPE9568F36-D428-11d2-A769-00AA001ACF42', '/'),
+      preg_quote('PHPE9568F35-D428-11d2-A769-00AA001ACF42', '/'),
+      preg_quote('PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000', '/'),
+    );
+    $url = fURL::getWithQueryString();
+
+    foreach ($guids as $guid) {
+      if (preg_match('/\??\='.$guid.'/', $url)) {
+        $redirect = fURL::removeFromQueryString('='.$guid);
+        if ($redirect === '?') {
+          $redirect = fURL::get();
+        }
+        return fURL::redirect($redirect);
+      }
     }
   }
 
@@ -82,6 +107,7 @@ class kRouter {
    */
   public static function run() {
     self::registerRoutes();
+    self::redirectGUID();
     Moor::run();
   }
 }
