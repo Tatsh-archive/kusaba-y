@@ -1,4 +1,16 @@
 <?php
+/**
+ * Core class.
+ *
+ * @copyright 2012 Andrew Udvare
+ * @author Andrew Udvare <audvare@gmail.com>
+ * @license MIT
+ *
+ * @package KusabaY
+ * @link https://github.com/HopelessCode/kusaba-y GitHub repository
+ *
+ * @version 1.0
+ */
 class kCore extends sCore {
   const closeLogHandle           = 'kCore::closeLogHandle';
   const debugCallback            = 'kCore::debugCallback';
@@ -118,7 +130,7 @@ class kCore extends sCore {
     }
 
     if (!is_array(self::$settings)) {
-      $set = fRecordSet::build('SiteSetting');
+      $set = fRecordSet::build(SiteSetting);
       self::$settings = array();
 
       foreach ($set as $item) {
@@ -233,6 +245,8 @@ class kCore extends sCore {
     foreach (self::$css_files as $file) {
       sTemplate::addCSSFile($file);
     }
+
+    fPagination::extend();
   }
 
   /**
