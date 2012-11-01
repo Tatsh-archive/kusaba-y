@@ -109,7 +109,7 @@ class ThreadController extends MoorActionController {
 
     $limit = fRequest::getValid('limit', array(15, 25, 50)) - 1;
     $page = fRequest::get('page', 'integer', 1);
-    $form = new sCRUDForm('Reply');
+    $form = new sCRUDForm(Reply);
 
     $form->hideFields(array(
       'thread_id',
@@ -134,10 +134,10 @@ class ThreadController extends MoorActionController {
     $form->addAction('submit', __('Submit'));
 
     $form_html = $form->make();
-    $replies = fRecordSet::build('Reply', array('thread_id=' => $this->thread->getId()), array('date_updated' => 'ASC'), $limit, $page);
+    $replies = fRecordSet::build(Reply, array('thread_id=' => $this->thread->getId()), array('date_updated' => 'ASC'), $limit, $page);
     $pagination = new fPagination($replies, $limit, $page);
     $content = sTemplate::buffer('board-header', array(
-      'boards' => fRecordSet::build('Board', array(), array('short_u_r_l' => 'ASC')),
+      'boards' => fRecordSet::build(Board, array(), array('short_u_r_l' => 'ASC')),
     ));
     $content .= sTemplate::buffer('thread-header', array(
       'reply_form' => $form_html,
@@ -148,7 +148,7 @@ class ThreadController extends MoorActionController {
     $content .= sTemplate::buffer('thread-list', array(
       'thread' => $this->thread,
       'replies' => $replies,
-      'pagination' => $pagination->makeLinks(),
+      'pagination' => $replies->makeLinks(),
       'loading_img_src' => kCore::getSetting('posts.loading_image_source', 'string', '/files/images/loading.png'),
     ));
 

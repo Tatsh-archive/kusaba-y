@@ -30,7 +30,7 @@ class BoardController extends MoorActionController {
       }
 
       $url = substr($url, 1, -1);
-      $set = fRecordSet::build('Board', array('short_u_r_l=' => $url));
+      $set = fRecordSet::build(Board, array('short_u_r_l=' => $url));
       $set->tossIfEmpty();
 
       return $set[0];
@@ -246,12 +246,12 @@ class BoardController extends MoorActionController {
     $title = $this->board->getName();
     $page = fRequest::get('page', 'integer', 1);
     $limit = 15;
-    $boards = fRecordSet::build('Board', array(), array('short_u_r_l' => 'ASC'));
+    $boards = fRecordSet::build(Board, array(), array('short_u_r_l' => 'ASC'));
 
     sRequest::setPostValues(self::POST_KEY);
     self::configureRecaptcha();
 
-    $form = new sCRUDForm('Thread');
+    $form = new sCRUDForm(Thread);
     $form->hideFields(array(
       'board_name',
       'is_anonymous',
@@ -275,7 +275,7 @@ class BoardController extends MoorActionController {
     )));
     $form->addAction('submit', __('Submit'));
 
-    $threads = fRecordSet::build('Thread', array(
+    $threads = fRecordSet::build(Thread, array(
         'board_name=' => $title,
       ),
       array('date_updated' => 'DESC'),
@@ -291,7 +291,7 @@ class BoardController extends MoorActionController {
       'threads' => $threads,
       'last_validation_message' => fMessaging::retrieve('validation', fURL::get()),
       'board_form' => $form->make(),
-      'pagination' => $pagination->makeLinks(),
+      'pagination' => $threads->makeLinks(),
       'loading_img_src' => kCore::getSetting('posts.loading_image_source', 'string', '/files/images/loading.png'),
     ));
 
