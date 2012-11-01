@@ -15,6 +15,6 @@ class Reply extends Thread {
   }
 
   public function encodeReplyURL() {
-    throw new fProgrammerException('"%s->%s" is not implemented because Reply object do not have replies.', __CLASS__, __FUNCTION__);
+    throw new fProgrammerException('"%s->%s" is not implemented because Reply objects do not have replies.', __CLASS__, __FUNCTION__);
   }
 }
